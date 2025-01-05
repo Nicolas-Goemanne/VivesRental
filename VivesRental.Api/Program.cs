@@ -65,23 +65,40 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<VivesRentalDbContext>();
-    if (!dbContext.Customers.Any())
-    {
-        dbContext.SeedData();
-    }
+    SeedData(dbContext);
 }
 
 app.Run();
 
+void SeedData(VivesRentalDbContext context)
+{
+    var customers = new List<Customer>
+    {
+        new Customer { Id = Guid.NewGuid(), FirstName = "Nicolas", LastName = "Goemanne", Email = "nicolas.test@example.com", PhoneNumber = "1234567890" },
+        new Customer { Id = Guid.NewGuid(), FirstName = "Jane", LastName = "Doe", Email = "converge@example.com", PhoneNumber = "0987654321" }
+    };
 
+    var products = new List<Product>
+    {
+        new Product { Id = Guid.NewGuid(), Name = "Rode schop", Description = "Sneeuwschop voor de parking te ontruimen", Manufacturer = "Makita", Publisher = "Publisher 1", RentalExpiresAfterDays = 30 },
+        new Product { Id = Guid.NewGuid(), Name = "Groene schop", Description = "Tuinwerk schop", Manufacturer = "Bosch", Publisher = "Publisher 2", RentalExpiresAfterDays = 60 }
+    };
 
+    var articles = new List<Article>
+    {
+        new Article { Id = Guid.NewGuid(), ProductId = products[0].Id, Status = ArticleStatus.Normal },
+        new Article { Id = Guid.NewGuid(), ProductId = products[0].Id, Status = ArticleStatus.Normal },
+        new Article { Id = Guid.NewGuid(), ProductId = products[0].Id, Status = ArticleStatus.Normal },
+        new Article { Id = Guid.NewGuid(), ProductId = products[1].Id, Status = ArticleStatus.Normal },
+        new Article { Id = Guid.NewGuid(), ProductId = products[1].Id, Status = ArticleStatus.Normal }
+    };
 
+    context.Customers.AddRange(customers);
+    context.Products.AddRange(products);
+    context.Articles.AddRange(articles);
 
-
-
-
-
-
+    context.SaveChanges();
+}
 
 
 

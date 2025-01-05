@@ -1,4 +1,4 @@
-@VivesRentel.Api_HostAddress = http://localhost:5139
+@VivesRental.Api_HostAddress = http://localhost:5139
 
 GET {{VivesRental.Api_HostAddress}}/weatherforecast/
 Accept: application/json
