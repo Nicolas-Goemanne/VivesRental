@@ -62,14 +62,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-using (var scope = app.Services.CreateScope())
-{
-    var dbContext = scope.ServiceProvider.GetRequiredService<VivesRentalDbContext>();
-    if (!dbContext.Customers.Any())
-    {
-        dbContext.SeedData();
-    }
-}
 
 app.Run();
 
