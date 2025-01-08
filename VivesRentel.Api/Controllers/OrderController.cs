@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using VivesRental.Sdk;
+using VivesRental.Services.Abstractions;
 using VivesRental.Services.Model.Filters;
 using VivesRental.Services.Model.Results;
 
@@ -9,17 +9,17 @@ namespace VivesRental.Api.Controllers
     [Route("api/[controller]")]
     public class OrderController : ControllerBase
     {
-        private readonly OrderSdk _orderSdk;
+        private readonly IOrderService _orderService;
 
-        public OrderController(OrderSdk orderSdk)
+        public OrderController(IOrderService orderService)
         {
-            _orderSdk = orderSdk;
+            _orderService = orderService;
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<OrderResult>> Get(Guid id)
         {
-            var result = await _orderSdk.Get(id);
+            var result = await _orderService.Get(id);
             if (result == null)
             {
                 return NotFound();
@@ -30,14 +30,14 @@ namespace VivesRental.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<List<OrderResult>>> Find([FromQuery] OrderFilter? filter)
         {
-            var results = await _orderSdk.Find(filter);
+            var results = await _orderService.Find(filter);
             return Ok(results);
         }
 
         [HttpPost]
         public async Task<ActionResult<OrderResult>> Create(Guid customerId)
         {
-            var result = await _orderSdk.Create(customerId);
+            var result = await _orderService.Create(customerId);
             if (result == null)
             {
                 return BadRequest();
@@ -45,15 +45,36 @@ namespace VivesRental.Api.Controllers
             return CreatedAtAction(nameof(Get), new { id = result.Id }, result);
         }
 
-        [HttpPost("{id}/return")]
+        [HttpPut("{id}/return")]
         public async Task<IActionResult> Return(Guid id, DateTime returnedAt)
         {
-            var success = await _orderSdk.Return(id, returnedAt);
+            var success = await _orderService.Return(id, returnedAt);
             if (!success)
             {
-                return BadRequest();
+                return NotFound();
             }
             return NoContent();
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

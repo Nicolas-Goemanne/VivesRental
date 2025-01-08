@@ -1,0 +1,55 @@
+﻿@page "/customer-management/create"
+@using VivesRental.Sdk
+@using VivesRental.Services.Model.Requests
+@inject CustomerSdk CustomerSdk
+@inject NavigationManager Navigation
+
+<PageTitle>Create Customer</PageTitle>
+
+<h1 class="text-center dark-red">Create Customer</h1>
+
+<div class="container mt-4">
+    <EditForm Model="@newCustomer" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label for="firstName" class="form-label">First Name</label>
+            <InputText id="firstName" class="form-control" @bind-Value="newCustomer.FirstName" />
+        </div>
+
+        <div class="mb-3">
+            <label for="lastName" class="form-label">Last Name</label>
+            <InputText id="lastName" class="form-control" @bind-Value="newCustomer.LastName" />
+        </div>
+
+        <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <InputText id="email" class="form-control" @bind-Value="newCustomer.Email" />
+        </div>
+
+        <div class="mb-3">
+            <label for="phoneNumber" class="form-label">Phone Number</label>
+            <InputText id="phoneNumber" class="form-control" @bind-Value="newCustomer.PhoneNumber" />
+        </div>
+
+        <button type="submit" class="btn dark-red-btn text-white">Submit</button>
+    </EditForm>
+</div>
+
+@code {
+    private CustomerRequest newCustomer = new CustomerRequest();
+
+    private async Task HandleValidSubmit()
+    {
+        var result = await CustomerSdk.Create(newCustomer);
+        if (result != null)
+        {
+            Navigation.NavigateTo("/customer-management");
+        }
+        else
+        {
+            // Handle error
+        }
+    }
+}

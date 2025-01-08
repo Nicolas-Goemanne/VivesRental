@@ -1,0 +1,87 @@
+﻿@page "/account/sign-in"
+@using Microsoft.AspNetCore.Components.Authorization
+@using VivesRental.Authentication
+@using VivesRental.Blazor.Security
+@using VivesRental.Sdk
+@using VivesRental.Services.Model.Requests
+@inject IdentitySdk IdentitySdk
+@inject NavigationManager Navigation
+@inject IBearerTokenStore TokenStore
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<PageTitle>Sign In</PageTitle>
+
+<h1>Sign In</h1>
+
+<EditForm Model="@signInRequest" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label>Username</label>
+        <InputText @bind-Value="signInRequest.Username" />
+    </div>
+
+    <div>
+        <label>Password</label>
+        <InputText @bind-Value="signInRequest.Password" type="password" />
+    </div>
+
+    <button type="submit">Sign In</button>
+</EditForm>
+
+<p>@errorMessage</p>
+
+@code {
+    private UserSignInRequest signInRequest = new() { Username = "", Password = "" };
+    private string errorMessage = string.Empty;
+
+    private async Task HandleValidSubmit()
+    {
+        var result = await IdentitySdk.SignIn(signInRequest);
+
+        if (result.Success)
+        {
+            TokenStore.SetToken(result.Token);
+            ((TokenAuthenticationStateProvider)AuthenticationStateProvider).AuthenticateUser();
+            Navigation.NavigateTo("/dashboard");
+        }
+        else
+        {
+            errorMessage = "Login mislukt. Controleer uw gegevens.";
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

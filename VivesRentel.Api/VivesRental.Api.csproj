@@ -25,6 +25,7 @@
   <ItemGroup>
     <ProjectReference Include="..\VivesRental.Repository\VivesRental.Repository.csproj" />
     <ProjectReference Include="..\VivesRental.Sdk\VivesRental.Sdk.csproj" />
+    <ProjectReference Include="..\VivesRental.Services.Abstractions\VivesRental.Services.Abstractions.csproj" />
     <ProjectReference Include="..\VivesRental.Services.Model\VivesRental.Services.Model.csproj" />
   </ItemGroup>
 

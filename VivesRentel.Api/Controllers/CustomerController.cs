@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using VivesRental.Sdk;
+using VivesRental.Services.Abstractions;
 using VivesRental.Services.Model.Filters;
 using VivesRental.Services.Model.Requests;
 using VivesRental.Services.Model.Results;
@@ -10,17 +10,17 @@ namespace VivesRental.Api.Controllers
     [Route("api/[controller]")]
     public class CustomerController : ControllerBase
     {
-        private readonly CustomerSdk _customerSdk;
+        private readonly ICustomerService _customerService;
 
-        public CustomerController(CustomerSdk customerSdk)
+        public CustomerController(ICustomerService customerService)
         {
-            _customerSdk = customerSdk;
+            _customerService = customerService;
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<CustomerResult>> Get(Guid id)
         {
-            var result = await _customerSdk.Get(id);
+            var result = await _customerService.Get(id);
             if (result == null)
             {
                 return NotFound();
@@ -31,14 +31,14 @@ namespace VivesRental.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<List<CustomerResult>>> Find([FromQuery] CustomerFilter? filter)
         {
-            var results = await _customerSdk.Find(filter);
+            var results = await _customerService.Find(filter);
             return Ok(results);
         }
 
         [HttpPost]
         public async Task<ActionResult<CustomerResult>> Create(CustomerRequest request)
         {
-            var result = await _customerSdk.Create(request);
+            var result = await _customerService.Create(request);
             if (result == null)
             {
                 return BadRequest();
@@ -49,7 +49,7 @@ namespace VivesRental.Api.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult<CustomerResult>> Edit(Guid id, CustomerRequest request)
         {
-            var result = await _customerSdk.Edit(id, request);
+            var result = await _customerService.Edit(id, request);
             if (result == null)
             {
                 return NotFound();
@@ -60,7 +60,7 @@ namespace VivesRental.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Remove(Guid id)
         {
-            var success = await _customerSdk.Remove(id);
+            var success = await _customerService.Remove(id);
             if (!success)
             {
                 return NotFound();
@@ -69,3 +69,12 @@ namespace VivesRental.Api.Controllers
         }
     }
 }
+
+
+
+
+
+
+
+
+

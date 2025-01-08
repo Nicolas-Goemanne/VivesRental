@@ -1,0 +1,25 @@
+﻿@page "/"
+@using VivesRental.Authentication
+@inject NavigationManager NavigationManager
+@inject IBearerTokenStore TokenStore
+
+
+
+@code {
+    protected override void OnInitialized()
+    {
+        var token = TokenStore.GetToken();
+
+        if (!string.IsNullOrWhiteSpace(token))
+        {
+            // Gebruiker is ingelogd, navigeer naar dashboard
+            NavigationManager.NavigateTo("/dashboard");
+        }
+        else
+        {
+            // Gebruiker is niet ingelogd, navigeer naar sign-in
+            NavigationManager.NavigateTo(AppRoutes.Account.SignIn);
+        }
+    }
+}
+

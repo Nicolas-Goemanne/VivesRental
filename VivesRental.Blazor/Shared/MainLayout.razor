@@ -1,31 +1,54 @@
 ﻿@inherits LayoutComponentBase
+@using Microsoft.AspNetCore.Components.Authorization
+@using VivesRental.Authentication
+@using VivesRental.Blazor.Security
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject IBearerTokenStore TokenStore
+@inject NavigationManager NavigationManager
 
 <nav class="navbar navbar-expand-lg navbar-dark dark-red-bg">
     <div class="container-fluid">
-        <a class="navbar-brand text-white" href="/">VivesRental</a>
+        <a class="navbar-brand text-white" href="@AppRoutes.Home.Index">VivesRental</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link text-white" href="/dashboard">Dashboard</a>
+                    <NavLink class="nav-link text-white" href="@AppRoutes.Home.Index">Dashboard</NavLink>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-white" href="/customer-management">Customer Management</a>
+                    <NavLink class="nav-link text-white" href="@AppRoutes.Customers.Index">Customer Management</NavLink>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-white" href="/article-management">Article Management</a>
+                    <NavLink class="nav-link text-white" href="@AppRoutes.Articles.Index">Article Management</NavLink>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-white" href="/rental-info">Rental Information</a>
+                    <NavLink class="nav-link text-white" href="@AppRoutes.Rentals.Index">Rental Information</NavLink>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-white" href="/new-rental-order">New Rental Order</a>
+                    <NavLink class="nav-link text-white" href="@AppRoutes.Orders.Index">New Rental Order</NavLink>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link text-white" href="/return-order">Return Order</a>
+                    <NavLink class="nav-link text-white" href="@AppRoutes.Returns.Index">Return Order</NavLink>
                 </li>
+            </ul>
+            <ul class="navbar-nav ml-auto">
+                <AuthorizeView>
+                    <Authorized>
+                        <li class="nav-item">
+                            <span class="nav-link text-white">@context.User.Identity.Name</span>
+                        </li>
+                        <li class="nav-item">
+                            <button class="nav-link text-white btn btn-link" @onclick="Logout">Logout</button>
+                        </li>
+                    </Authorized>
+                    <NotAuthorized>
+                        <li class="nav-item">
+                            <NavLink class="nav-link text-white" href="@AppRoutes.Account.SignIn">Sign In</NavLink>
+                        </li>
+                    </NotAuthorized>
+                </AuthorizeView>
             </ul>
         </div>
     </div>
@@ -40,6 +63,86 @@
         <p>&copy; 2023 VivesRental. All rights reserved.</p>
     </div>
 </footer>
+
+@code {
+    private void Logout()
+    {
+        TokenStore.SetToken(string.Empty);
+        ((TokenAuthenticationStateProvider)AuthenticationStateProvider).AuthenticateUser();
+        NavigationManager.NavigateTo(AppRoutes.Account.SignIn);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

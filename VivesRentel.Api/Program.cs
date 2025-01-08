@@ -1,12 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using VivesRental.Repository.Core;
-using VivesRental.Sdk;
 using VivesRental.Services.Abstractions;
 using VivesRental.Services;
 using VivesRental.Enums;
 using VivesRental.Model;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Options;
+using VivesRental.Repository.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,7 +18,29 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc("v1", new OpenApiInfo { Title = "VivesRental API", Version = "v1" });
+    var securityDefinition = new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey
+    };
+    options.AddSecurityDefinition("Bearer", securityDefinition);
+    var securityRequirementScheme = new OpenApiSecurityScheme
+    {
+        Reference = new OpenApiReference
+        {
+            Type = ReferenceType.SecurityScheme,
+            Id = "Bearer"
+        }
+    };
+    var securityRequirement = new OpenApiSecurityRequirement
+    {
+        {
+            securityRequirementScheme, new string[] { }
+        }
+    };
+    options.AddSecurityRequirement(securityRequirement);
 });
 
 builder.Services.AddDbContext<VivesRentalDbContext>(options =>
@@ -30,17 +53,25 @@ builder.Services.AddScoped<IOrderService, OrderService>();
 builder.Services.AddScoped<IOrderLineService, OrderLineService>();
 builder.Services.AddScoped<IArticleReservationService, ArticleReservationService>();
 
-builder.Services.AddScoped<ProductSdk>();
-builder.Services.AddScoped<ArticleSdk>();
-builder.Services.AddScoped<CustomerSdk>();
-builder.Services.AddScoped<OrderSdk>();
-builder.Services.AddScoped<OrderLineSdk>();
-builder.Services.AddScoped<ArticleReservationSdk>();
+builder.Services.AddScoped<IdentityService>();
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
+builder.Services.AddSingleton(resolver => resolver.GetRequiredService<IOptions<JwtSettings>>().Value);
 
 // Configure Identity
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddEntityFrameworkStores<VivesRentalDbContext>()
     .AddDefaultTokenProviders();
+
+// Configure CORS
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(builder =>
+    {
+        builder.WithOrigins("https://localhost:7130") 
+               .AllowAnyHeader()
+               .AllowAnyMethod();
+    });
+});
 
 var app = builder.Build();
 
@@ -57,13 +88,28 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseCors();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
 
-
 app.Run();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

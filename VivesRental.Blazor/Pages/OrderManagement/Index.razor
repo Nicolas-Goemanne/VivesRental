@@ -1,0 +1,65 @@
+﻿@page "/order-management"
+@using VivesRental.Sdk
+@using VivesRental.Services.Model.Results
+@inject OrderSdk OrderSdk
+
+<PageTitle>Order Management</PageTitle>
+
+<h1 class="text-center dark-red">Order Management</h1>
+
+<a class="btn dark-red-btn text-white mb-3" href="/order-management/create">Add Order</a>
+
+<table class="table table-striped">
+    <thead>
+    <tr>
+        <th>Customer ID</th>
+        <th>Created At</th>
+        <th>Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var order in Orders)
+    {
+        <tr>
+            <td>@order.CustomerId</td>
+            <td>@order.CreatedAt</td>
+            <td>
+                <a class="btn btn-sm btn-primary" href="/order-management/edit/@order.Id">Edit</a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+@code {
+    private IList<OrderResult> Orders { get; set; } = new List<OrderResult>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await OrderSdk.Find(null);
+        if (result != null)
+        {
+            Orders = result;
+        }
+
+        await base.OnInitializedAsync();
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

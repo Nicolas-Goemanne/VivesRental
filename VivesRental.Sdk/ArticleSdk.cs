@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Net.Http;
+using System.Net.Http.Json;
 using VivesRental.Enums;
-using VivesRental.Services.Abstractions;
 using VivesRental.Services.Model.Filters;
 using VivesRental.Services.Model.Requests;
 using VivesRental.Services.Model.Results;
@@ -13,36 +9,61 @@ namespace VivesRental.Sdk
 {
     public class ArticleSdk
     {
-        private readonly IArticleService _articleService;
+        private readonly HttpClient _httpClient;
 
-        public ArticleSdk(IArticleService articleService)
+        public ArticleSdk(HttpClient httpClient)
         {
-            _articleService = articleService;
+            _httpClient = httpClient;
         }
 
-        public Task<ArticleResult?> Get(Guid id)
+        public async Task<ArticleResult?> Get(Guid id)
         {
-            return _articleService.Get(id);
+            var response = await _httpClient.GetAsync($"api/articles/{id}");
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<ArticleResult>();
         }
 
-        public Task<List<ArticleResult>> Find(ArticleFilter? filter)
+        public async Task<List<ArticleResult>> Find(ArticleFilter? filter)
         {
-            return _articleService.Find(filter);
+            var response = await _httpClient.PostAsJsonAsync("api/articles/find", filter);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<List<ArticleResult>>();
         }
 
-        public Task<ArticleResult?> Create(ArticleRequest entity)
+        public async Task<ArticleResult?> Create(ArticleRequest entity)
         {
-            return _articleService.Create(entity);
+            var response = await _httpClient.PostAsJsonAsync("api/articles", entity);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<ArticleResult>();
         }
 
-        public Task<bool> UpdateStatus(Guid articleId, ArticleStatus status)
+        public async Task<bool> UpdateStatus(Guid articleId, ArticleStatus status)
         {
-            return _articleService.UpdateStatus(articleId, status);
+            var response = await _httpClient.PutAsJsonAsync($"api/articles/{articleId}/status", status);
+            return response.IsSuccessStatusCode;
         }
 
-        public Task<bool> Remove(Guid id)
+        public async Task<bool> Remove(Guid id)
         {
-            return _articleService.Remove(id);
+            var response = await _httpClient.DeleteAsync($"api/articles/{id}");
+            return response.IsSuccessStatusCode;
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

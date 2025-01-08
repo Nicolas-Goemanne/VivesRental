@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using VivesRental.Services.Abstractions;
+﻿using System.Net.Http;
+using System.Net.Http.Json;
 using VivesRental.Services.Model.Filters;
 using VivesRental.Services.Model.Results;
 
@@ -11,31 +7,44 @@ namespace VivesRental.Sdk
 {
     public class OrderSdk
     {
-        private readonly IOrderService _orderService;
+        private readonly HttpClient _httpClient;
 
-        public OrderSdk(IOrderService orderService)
+        public OrderSdk(HttpClient httpClient)
         {
-            _orderService = orderService;
+            _httpClient = httpClient;
         }
 
-        public Task<OrderResult?> Get(Guid id)
+        public async Task<OrderResult?> Get(Guid id)
         {
-            return _orderService.Get(id);
+            var response = await _httpClient.GetAsync($"api/orders/{id}");
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<OrderResult>();
         }
 
-        public Task<List<OrderResult>> Find(OrderFilter? filter)
+        public async Task<List<OrderResult>> Find(OrderFilter? filter)
         {
-            return _orderService.Find(filter);
+            var response = await _httpClient.PostAsJsonAsync("api/orders/find", filter);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<List<OrderResult>>();
         }
 
-        public Task<OrderResult?> Create(Guid customerId)
+        public async Task<OrderResult?> Create(Guid customerId)
         {
-            return _orderService.Create(customerId);
+            var response = await _httpClient.PostAsJsonAsync($"api/orders?customerId={customerId}", customerId);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<OrderResult>();
         }
 
-        public Task<bool> Return(Guid id, DateTime returnedAt)
+        public async Task<bool> Return(Guid id, DateTime returnedAt)
         {
-            return _orderService.Return(id, returnedAt);
+            var response = await _httpClient.PutAsJsonAsync($"api/orders/{id}/return", returnedAt);
+            return response.IsSuccessStatusCode;
+        }
+
+        public async Task<bool> Remove(Guid id)
+        {
+            var response = await _httpClient.DeleteAsync($"api/orders/{id}");
+            return response.IsSuccessStatusCode;
         }
     }
 }

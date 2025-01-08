@@ -1,5 +1,10 @@
-﻿@page "/"
+﻿@using Microsoft.AspNetCore.Authorization
+
 @page "/dashboard"
+
+@attribute [Authorize]
+
+<PageTitle>Dashboard</PageTitle>
 
 <h1 class="text-center dark-red">Dashboard</h1>
 
@@ -54,6 +59,11 @@
         </div>
     </div>
 </div>
+
+
+
+
+
 
 
 

@@ -1,6 +1,56 @@
 ﻿@page "/rental-info"
+@using System.Net.Http.Json
+
+@inject HttpClient Http
+@inject NavigationManager Navigation
 
 <PageTitle>Rental Information</PageTitle>
 
-<h1>Rental Information</h1>
-<p>View all rental orders and information.</p>
+<h1 class="text-center dark-red">Rental Information</h1>
+
+<div class="container mt-4">
+    <table class="table table-striped">
+        <thead>
+        <tr>
+            <th>Order ID</th>
+            <th>Customer Name</th>
+            <th>Order Date</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var order in orders)
+        {
+            <tr>
+                <td>@order.OrderId</td>
+                <td>@order.CustomerName</td>
+                <td>@order.OrderDate.ToString("yyyy-MM-dd")</td>
+                <td>
+                    <button class="btn dark-red-btn text-white" @onclick="() => ViewOrderDetails(order.OrderId)">View Details</button>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    private List<Order> orders = new List<Order>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        orders = await Http.GetFromJsonAsync<List<Order>>("api/orders");
+    }
+
+    private void ViewOrderDetails(string orderId)
+    {
+        Navigation.NavigateTo($"/order-details/{orderId}");
+    }
+
+    public class Order
+    {
+        public string OrderId { get; set; }
+        public string CustomerName { get; set; }
+        public DateTime OrderDate { get; set; }
+    }
+}

@@ -1,46 +1,62 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using VivesRental.Services.Abstractions;
+﻿using System.Net.Http;
+using System.Net.Http.Json;
 using VivesRental.Services.Model.Filters;
+using VivesRental.Services.Model.Requests;
 using VivesRental.Services.Model.Results;
 
 namespace VivesRental.Sdk
 {
     public class OrderLineSdk
     {
-        private readonly IOrderLineService _orderLineService;
+        private readonly HttpClient _httpClient;
 
-        public OrderLineSdk(IOrderLineService orderLineService)
+        public OrderLineSdk(HttpClient httpClient)
         {
-            _orderLineService = orderLineService;
+            _httpClient = httpClient;
         }
 
-        public Task<OrderLineResult?> Get(Guid id)
+        public async Task<OrderLineResult?> Get(Guid id)
         {
-            return _orderLineService.Get(id);
+            var response = await _httpClient.GetAsync($"api/orderlines/{id}");
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<OrderLineResult>();
         }
 
-        public Task<List<OrderLineResult>> Find(OrderLineFilter? filter)
+        public async Task<List<OrderLineResult>> Find(OrderLineFilter? filter)
         {
-            return _orderLineService.Find(filter);
+            var response = await _httpClient.PostAsJsonAsync("api/orderlines/find", filter);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<List<OrderLineResult>>();
         }
 
-        public Task<bool> Rent(Guid orderId, Guid articleId)
+        public async Task<OrderLineResult?> Create(OrderLineRequest entity)
         {
-            return _orderLineService.Rent(orderId, articleId);
+            var response = await _httpClient.PostAsJsonAsync("api/orderlines", entity);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<OrderLineResult>();
         }
 
-        public Task<bool> Rent(Guid orderId, IList<Guid> articleIds)
+        public async Task<bool> Remove(Guid id)
         {
-            return _orderLineService.Rent(orderId, articleIds);
-        }
-
-        public Task<bool> Return(Guid orderLineId, DateTime returnedAt)
-        {
-            return _orderLineService.Return(orderLineId, returnedAt);
+            var response = await _httpClient.DeleteAsync($"api/orderlines/{id}");
+            return response.IsSuccessStatusCode;
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

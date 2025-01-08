@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using VivesRental.Services.Abstractions;
+﻿using System.Net.Http;
+using System.Net.Http.Json;
 using VivesRental.Services.Model.Filters;
 using VivesRental.Services.Model.Requests;
 using VivesRental.Services.Model.Results;
@@ -12,31 +8,55 @@ namespace VivesRental.Sdk
 {
     public class ArticleReservationSdk
     {
-        private readonly IArticleReservationService _articleReservationService;
+        private readonly HttpClient _httpClient;
 
-        public ArticleReservationSdk(IArticleReservationService articleReservationService)
+        public ArticleReservationSdk(HttpClient httpClient)
         {
-            _articleReservationService = articleReservationService;
+            _httpClient = httpClient;
         }
 
-        public Task<ArticleReservationResult?> Get(Guid id)
+        public async Task<ArticleReservationResult?> Get(Guid id)
         {
-            return _articleReservationService.Get(id);
+            var response = await _httpClient.GetAsync($"api/articlereservations/{id}");
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<ArticleReservationResult>();
         }
 
-        public Task<List<ArticleReservationResult>> Find(ArticleReservationFilter? filter)
+        public async Task<List<ArticleReservationResult>> Find(ArticleReservationFilter? filter)
         {
-            return _articleReservationService.Find(filter);
+            var response = await _httpClient.PostAsJsonAsync("api/articlereservations/find", filter);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<List<ArticleReservationResult>>();
         }
 
-        public Task<ArticleReservationResult?> Create(ArticleReservationRequest request)
+        public async Task<ArticleReservationResult?> Create(ArticleReservationRequest entity)
         {
-            return _articleReservationService.Create(request);
+            var response = await _httpClient.PostAsJsonAsync("api/articlereservations", entity);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<ArticleReservationResult>();
         }
 
-        public Task<bool> Remove(Guid id)
+        public async Task<bool> Remove(Guid id)
         {
-            return _articleReservationService.Remove(id);
+            var response = await _httpClient.DeleteAsync($"api/articlereservations/{id}");
+            return response.IsSuccessStatusCode;
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

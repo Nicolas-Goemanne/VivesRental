@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using VivesRental.Sdk;
+using VivesRental.Services.Abstractions;
 using VivesRental.Services.Model.Filters;
 using VivesRental.Services.Model.Requests;
 using VivesRental.Services.Model.Results;
@@ -10,17 +10,17 @@ namespace VivesRental.Api.Controllers
     [Route("api/[controller]")]
     public class ProductController : ControllerBase
     {
-        private readonly ProductSdk _productSdk;
+        private readonly IProductService _productService;
 
-        public ProductController(ProductSdk productSdk)
+        public ProductController(IProductService productService)
         {
-            _productSdk = productSdk;
+            _productService = productService;
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<ProductResult>> Get(Guid id)
         {
-            var result = await _productSdk.Get(id);
+            var result = await _productService.Get(id);
             if (result == null)
             {
                 return NotFound();
@@ -31,14 +31,14 @@ namespace VivesRental.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<List<ProductResult>>> Find([FromQuery] ProductFilter? filter)
         {
-            var results = await _productSdk.Find(filter);
+            var results = await _productService.Find(filter);
             return Ok(results);
         }
 
         [HttpPost]
         public async Task<ActionResult<ProductResult>> Create(ProductRequest request)
         {
-            var result = await _productSdk.Create(request);
+            var result = await _productService.Create(request);
             if (result == null)
             {
                 return BadRequest();
@@ -49,7 +49,7 @@ namespace VivesRental.Api.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult<ProductResult>> Edit(Guid id, ProductRequest request)
         {
-            var result = await _productSdk.Edit(id, request);
+            var result = await _productService.Edit(id, request);
             if (result == null)
             {
                 return NotFound();
@@ -60,24 +60,23 @@ namespace VivesRental.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Remove(Guid id)
         {
-            var success = await _productSdk.Remove(id);
+            var success = await _productService.Remove(id);
             if (!success)
             {
                 return NotFound();
             }
             return NoContent();
         }
-
-        [HttpPost("{id}/generate-articles")]
-        public async Task<IActionResult> GenerateArticles(Guid id, int amount)
-        {
-            var success = await _productSdk.GenerateArticles(id, amount);
-            if (!success)
-            {
-                return BadRequest();
-            }
-            return NoContent();
-        }
     }
 }
+
+
+
+
+
+
+
+
+
+
 

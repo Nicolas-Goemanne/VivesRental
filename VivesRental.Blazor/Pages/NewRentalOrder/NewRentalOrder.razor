@@ -1,6 +1,51 @@
 ﻿@page "/new-rental-order"
+@using System.Net.Http.Json
+
+@inject HttpClient Http
+@inject NavigationManager Navigation
 
 <PageTitle>New Rental Order</PageTitle>
 
-<h1>New Rental Order</h1>
-<p>Start a new rental order.</p>
+<h1 class="text-center dark-red">New Rental Order</h1>
+
+<div class="container mt-4">
+    <EditForm Model="@newRentalOrder" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label for="customerId" class="form-label">Customer ID</label>
+            <InputText id="customerId" class="form-control" @bind-Value="newRentalOrder.CustomerId" />
+        </div>
+
+        <div class="mb-3">
+            <label for="productId" class="form-label">Product ID</label>
+            <InputText id="productId" class="form-control" @bind-Value="newRentalOrder.ProductId" />
+        </div>
+
+        <button type="submit" class="btn dark-red-btn text-white">Submit</button>
+    </EditForm>
+</div>
+
+@code {
+    private NewRentalOrderModel newRentalOrder = new NewRentalOrderModel();
+
+    private async Task HandleValidSubmit()
+    {
+        var response = await Http.PostAsJsonAsync("api/rentalorders", newRentalOrder);
+        if (response.IsSuccessStatusCode)
+        {
+            Navigation.NavigateTo("/rental-info");
+        }
+        else
+        {
+            // Handle error
+        }
+    }
+
+    public class NewRentalOrderModel
+    {
+        public string CustomerId { get; set; }
+        public string ProductId { get; set; }
+    }
+}

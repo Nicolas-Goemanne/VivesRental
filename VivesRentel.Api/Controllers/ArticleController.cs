@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using VivesRental.Enums;
-using VivesRental.Model;
-using VivesRental.Repository.Core;
-using VivesRental.Sdk;
+using VivesRental.Services.Abstractions;
 using VivesRental.Services.Model.Filters;
 using VivesRental.Services.Model.Requests;
 using VivesRental.Services.Model.Results;
@@ -13,17 +11,17 @@ namespace VivesRental.Api.Controllers
     [Route("api/[controller]")]
     public class ArticleController : ControllerBase
     {
-        private readonly ArticleSdk _articleSdk;
+        private readonly IArticleService _articleService;
 
-        public ArticleController(ArticleSdk articleSdk)
+        public ArticleController(IArticleService articleService)
         {
-            _articleSdk = articleSdk;
+            _articleService = articleService;
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<ArticleResult>> Get(Guid id)
         {
-            var result = await _articleSdk.Get(id);
+            var result = await _articleService.Get(id);
             if (result == null)
             {
                 return NotFound();
@@ -34,14 +32,14 @@ namespace VivesRental.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<List<ArticleResult>>> Find([FromQuery] ArticleFilter? filter)
         {
-            var results = await _articleSdk.Find(filter);
+            var results = await _articleService.Find(filter);
             return Ok(results);
         }
 
         [HttpPost]
         public async Task<ActionResult<ArticleResult>> Create(ArticleRequest request)
         {
-            var result = await _articleSdk.Create(request);
+            var result = await _articleService.Create(request);
             if (result == null)
             {
                 return BadRequest();
@@ -52,7 +50,7 @@ namespace VivesRental.Api.Controllers
         [HttpPut("{id}/status")]
         public async Task<IActionResult> UpdateStatus(Guid id, ArticleStatus status)
         {
-            var success = await _articleSdk.UpdateStatus(id, status);
+            var success = await _articleService.UpdateStatus(id, status);
             if (!success)
             {
                 return NotFound();
@@ -63,7 +61,7 @@ namespace VivesRental.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Remove(Guid id)
         {
-            var success = await _articleSdk.Remove(id);
+            var success = await _articleService.Remove(id);
             if (!success)
             {
                 return NotFound();
@@ -72,3 +70,12 @@ namespace VivesRental.Api.Controllers
         }
     }
 }
+
+
+
+
+
+
+
+
+

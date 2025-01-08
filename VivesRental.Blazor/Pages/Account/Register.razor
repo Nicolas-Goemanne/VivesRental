@@ -1,0 +1,54 @@
+﻿@page "/account/register"
+@using VivesRental.Authentication
+@using VivesRental.Sdk
+@using VivesRental.Services.Model.Requests
+@inject IdentitySdk IdentitySdk
+@inject NavigationManager Navigation
+@inject IBearerTokenStore TokenStore
+
+<PageTitle>Register</PageTitle>
+
+<h1 class="text-center dark-red">Register</h1>
+
+<div class="container mt-4">
+    <EditForm Model="@registerRequest" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <InputText id="username" class="form-control" @bind-Value="registerRequest.Username" />
+        </div>
+
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <InputText id="password" type="password" class="form-control" @bind-Value="registerRequest.Password" />
+        </div>
+
+        <button type="submit" class="btn dark-red-btn text-white">Register</button>
+    </EditForm>
+
+    <p class="mt-3">Already have an account? <a href="/account/sign-in">Sign in here</a>.</p>
+</div>
+
+@code {
+    private UserRegisterRequest registerRequest = new UserRegisterRequest
+    {
+        Username = string.Empty,
+        Password = string.Empty
+    };
+
+    private async Task HandleValidSubmit()
+    {
+        var result = await IdentitySdk.Register(registerRequest);
+        if (result.Success)
+        {
+            TokenStore.SetToken(result.Token);
+            Navigation.NavigateTo("/dashboard");
+        }
+        else
+        {
+            // Handle error
+        }
+    }
+}

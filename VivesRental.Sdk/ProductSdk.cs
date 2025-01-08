@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using VivesRental.Services.Abstractions;
+﻿using System.Net.Http;
+using System.Net.Http.Json;
 using VivesRental.Services.Model.Filters;
 using VivesRental.Services.Model.Requests;
 using VivesRental.Services.Model.Results;
@@ -12,41 +8,62 @@ namespace VivesRental.Sdk
 {
     public class ProductSdk
     {
-        private readonly IProductService _productService;
+        private readonly HttpClient _httpClient;
 
-        public ProductSdk(IProductService productService)
+        public ProductSdk(HttpClient httpClient)
         {
-            _productService = productService;
+            _httpClient = httpClient;
         }
 
-        public Task<ProductResult?> Get(Guid id)
+        public async Task<ProductResult?> Get(Guid id)
         {
-            return _productService.Get(id);
+            var response = await _httpClient.GetAsync($"api/products/{id}");
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<ProductResult>();
         }
 
-        public Task<List<ProductResult>> Find(ProductFilter? filter)
+        public async Task<List<ProductResult>> Find(ProductFilter? filter)
         {
-            return _productService.Find(filter);
+            var response = await _httpClient.PostAsJsonAsync("api/products/find", filter);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<List<ProductResult>>();
         }
 
-        public Task<ProductResult?> Create(ProductRequest entity)
+        public async Task<ProductResult?> Create(ProductRequest entity)
         {
-            return _productService.Create(entity);
+            var response = await _httpClient.PostAsJsonAsync("api/products", entity);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<ProductResult>();
         }
 
-        public Task<ProductResult?> Edit(Guid id, ProductRequest entity)
+        public async Task<ProductResult?> Edit(Guid id, ProductRequest entity)
         {
-            return _productService.Edit(id, entity);
+            var response = await _httpClient.PutAsJsonAsync($"api/products/{id}", entity);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<ProductResult>();
         }
 
-        public Task<bool> Remove(Guid id)
+        public async Task<bool> Remove(Guid id)
         {
-            return _productService.Remove(id);
-        }
-
-        public Task<bool> GenerateArticles(Guid productId, int amount)
-        {
-            return _productService.GenerateArticles(productId, amount);
+            var response = await _httpClient.DeleteAsync($"api/products/{id}");
+            return response.IsSuccessStatusCode;
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

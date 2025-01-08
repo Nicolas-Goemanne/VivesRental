@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using VivesRental.Services.Abstractions;
+﻿using System.Net.Http;
+using System.Net.Http.Json;
 using VivesRental.Services.Model.Filters;
 using VivesRental.Services.Model.Requests;
 using VivesRental.Services.Model.Results;
@@ -12,36 +8,45 @@ namespace VivesRental.Sdk
 {
     public class CustomerSdk
     {
-        private readonly ICustomerService _customerService;
+        private readonly HttpClient _httpClient;
 
-        public CustomerSdk(ICustomerService customerService)
+        public CustomerSdk(HttpClient httpClient)
         {
-            _customerService = customerService;
+            _httpClient = httpClient;
         }
 
-        public Task<CustomerResult?> Get(Guid id)
+        public async Task<CustomerResult?> Get(Guid id)
         {
-            return _customerService.Get(id);
+            var response = await _httpClient.GetAsync($"api/customers/{id}");
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<CustomerResult>();
         }
 
-        public Task<List<CustomerResult>> Find(CustomerFilter? filter)
+        public async Task<List<CustomerResult>> Find(CustomerFilter? filter)
         {
-            return _customerService.Find(filter);
+            var response = await _httpClient.PostAsJsonAsync("api/customers/find", filter);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<List<CustomerResult>>();
         }
 
-        public Task<CustomerResult?> Create(CustomerRequest entity)
+        public async Task<CustomerResult?> Create(CustomerRequest entity)
         {
-            return _customerService.Create(entity);
+            var response = await _httpClient.PostAsJsonAsync("api/customers", entity);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<CustomerResult>();
         }
 
-        public Task<CustomerResult?> Edit(Guid id, CustomerRequest entity)
+        public async Task<CustomerResult?> Edit(Guid id, CustomerRequest entity)
         {
-            return _customerService.Edit(id, entity);
+            var response = await _httpClient.PutAsJsonAsync($"api/customers/{id}", entity);
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<CustomerResult>();
         }
 
-        public Task<bool> Remove(Guid id)
+        public async Task<bool> Remove(Guid id)
         {
-            return _customerService.Remove(id);
+            var response = await _httpClient.DeleteAsync($"api/customers/{id}");
+            return response.IsSuccessStatusCode;
         }
     }
 }

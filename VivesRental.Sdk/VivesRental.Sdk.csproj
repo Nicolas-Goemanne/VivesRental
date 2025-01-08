@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\VivesRental.Authentication\VivesRental.Authentication.csproj" />
     <ProjectReference Include="..\VivesRental.Services.Abstractions\VivesRental.Services.Abstractions.csproj" />
     <ProjectReference Include="..\VivesRental.Services\VivesRental.Services.csproj" />
   </ItemGroup>
