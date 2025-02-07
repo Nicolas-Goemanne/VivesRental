@@ -27,35 +27,69 @@
             }
         }
 
-        public static class Articles
+        public static class Products
         {
-            private const string Base = "/article-management";
+            private const string Base = "/product-management";
 
             public const string Index = $"{Base}";
-        }
+            public const string Create = $"{Base}/create";
+            public const string Edit = $"{Base}/edit/{{id:guid}}";
+            public const string Details = $"{Base}/details/{{id:guid}}";
+         
 
-        public static class Rentals
-        {
-            private const string Base = "/rental-info";
+            public static string EditUrl(Guid id)
+            {
+                return Edit.Replace("{id:guid}", id.ToString());
+            }
 
-            public const string Index = $"{Base}";
+            public static string DetailsUrl(Guid id)
+            {
+                return Details.Replace("{id:guid}", id.ToString());
+            }
+
+           
         }
 
         public static class Orders
         {
-            private const string Base = "/new-rental-order";
+            private const string Base = "/order-management";
 
             public const string Index = $"{Base}";
+            public const string Create = $"{Base}/create";
+            public const string Details = $"{Base}/details/{{id:guid}}";
+            public const string Return = $"{Base}/return";
+
+            public static string DetailsUrl(Guid id)
+            {
+                return Details.Replace("{id:guid}", id.ToString());
+            }
         }
 
-        public static class Returns
+        public static class Reservations
         {
-            private const string Base = "/return-order";
+            private const string Base = "/reservation-management";
 
             public const string Index = $"{Base}";
+            public const string Create = $"{Base}/create";
+            public const string Edit = $"{Base}/edit/{{id:guid}}";
+
+            public static string EditUrl(Guid id)
+            {
+                return Edit.Replace("{id:guid}", id.ToString());
+            }
+        }
+
+        public static class Dashboard
+        {
+            public const string Index = "/dashboard";
         }
     }
 }
+
+
+
+
+
 
 
 

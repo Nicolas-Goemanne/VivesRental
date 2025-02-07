@@ -3,60 +3,60 @@ using VivesRental.Services.Abstractions;
 using VivesRental.Services.Model.Filters;
 using VivesRental.Services.Model.Results;
 
-namespace VivesRental.Api.Controllers
+[ApiController]
+[Route("api/[controller]")]
+public class OrderController : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class OrderController : ControllerBase
+    private readonly IOrderService _orderService;
+
+    public OrderController(IOrderService orderService)
     {
-        private readonly IOrderService _orderService;
+        _orderService = orderService;
+    }
 
-        public OrderController(IOrderService orderService)
+    [HttpGet("{id}")]
+    public async Task<ActionResult<OrderResult>> Get(Guid id)
+    {
+        var result = await _orderService.Get(id);
+        if (result == null)
         {
-            _orderService = orderService;
+            return NotFound();
         }
+        return Ok(result);
+    }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<OrderResult>> Get(Guid id)
-        {
-            var result = await _orderService.Get(id);
-            if (result == null)
-            {
-                return NotFound();
-            }
-            return Ok(result);
-        }
+    [HttpGet]
+    public async Task<ActionResult<List<OrderResult>>> Find([FromQuery] OrderFilter? filter)
+    {
+        var results = await _orderService.Find(filter);
+        return Ok(results);
+    }
 
-        [HttpGet]
-        public async Task<ActionResult<List<OrderResult>>> Find([FromQuery] OrderFilter? filter)
+    [HttpPost]
+    public async Task<ActionResult<OrderResult>> Create([FromQuery] Guid customerId)
+    {
+        var result = await _orderService.Create(customerId);
+        if (result == null)
         {
-            var results = await _orderService.Find(filter);
-            return Ok(results);
+            return BadRequest(new { Message = "Failed to create order. Ensure the customer ID is valid." });
         }
+        return CreatedAtAction(nameof(Get), new { id = result.Id }, result);
+    }
 
-        [HttpPost]
-        public async Task<ActionResult<OrderResult>> Create(Guid customerId)
+    [HttpPost("{id}/Return")]
+    public async Task<IActionResult> Return(Guid id, [FromBody] DateTime returnedAt)
+    {
+        var success = await _orderService.Return(id, returnedAt);
+        if (!success)
         {
-            var result = await _orderService.Create(customerId);
-            if (result == null)
-            {
-                return BadRequest();
-            }
-            return CreatedAtAction(nameof(Get), new { id = result.Id }, result);
+            return BadRequest(new { Message = "Failed to return order. Verify order ID and return date." });
         }
-
-        [HttpPut("{id}/return")]
-        public async Task<IActionResult> Return(Guid id, DateTime returnedAt)
-        {
-            var success = await _orderService.Return(id, returnedAt);
-            if (!success)
-            {
-                return NotFound();
-            }
-            return NoContent();
-        }
+        return NoContent();
     }
 }
+
+
+
 
 
 

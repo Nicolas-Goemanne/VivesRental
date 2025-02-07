@@ -1,48 +1,56 @@
 ﻿using System.Net.Http;
 using System.Net.Http.Json;
 using VivesRental.Services.Model.Filters;
-using VivesRental.Services.Model.Requests;
 using VivesRental.Services.Model.Results;
 
 namespace VivesRental.Sdk
 {
     public class OrderLineSdk
     {
-        private readonly HttpClient _httpClient;
+        private readonly IHttpClientFactory _httpClientFactory;
 
-        public OrderLineSdk(HttpClient httpClient)
+        public OrderLineSdk(IHttpClientFactory httpClientFactory)
         {
-            _httpClient = httpClient;
+            _httpClientFactory = httpClientFactory;
         }
 
-        public async Task<OrderLineResult?> Get(Guid id)
+        public async Task<List<OrderLineResult>> Find(OrderLineFilter? filter = null)
         {
-            var response = await _httpClient.GetAsync($"api/orderlines/{id}");
+            var httpClient = _httpClientFactory.CreateClient("VivesRentalApi");
+            var queryString = filter != null ? $"?orderId={filter.OrderId}" : string.Empty;
+            var response = await httpClient.GetAsync($"api/OrderLine{queryString}");
             response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<OrderLineResult>();
+            return await response.Content.ReadFromJsonAsync<List<OrderLineResult>>() ?? new List<OrderLineResult>();
         }
 
-        public async Task<List<OrderLineResult>> Find(OrderLineFilter? filter)
+        public async Task<bool> Rent(Guid orderId, Guid articleId)
         {
-            var response = await _httpClient.PostAsJsonAsync("api/orderlines/find", filter);
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<List<OrderLineResult>>();
+            var httpClient = _httpClientFactory.CreateClient("VivesRentalApi");
+            var queryParams = $"?orderId={orderId}&articleId={articleId}";
+            var response = await httpClient.PostAsync($"api/OrderLine/Rent{queryParams}", null);
+            return response.IsSuccessStatusCode;
         }
 
-        public async Task<OrderLineResult?> Create(OrderLineRequest entity)
+        public async Task<bool> Return(Guid orderLineId, DateTime returnedAt)
         {
-            var response = await _httpClient.PostAsJsonAsync("api/orderlines", entity);
-            response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<OrderLineResult>();
-        }
-
-        public async Task<bool> Remove(Guid id)
-        {
-            var response = await _httpClient.DeleteAsync($"api/orderlines/{id}");
+            var httpClient = _httpClientFactory.CreateClient("VivesRentalApi");
+            var response = await httpClient.PostAsJsonAsync($"api/OrderLine/{orderLineId}/Return", returnedAt);
             return response.IsSuccessStatusCode;
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

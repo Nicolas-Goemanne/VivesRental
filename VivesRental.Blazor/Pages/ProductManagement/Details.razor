@@ -1,0 +1,195 @@
+﻿@page "/product-management/details/{id:guid}"
+@using VivesRental.Enums
+@using VivesRental.Sdk
+@using VivesRental.Services.Model.Results
+@inject ProductSdk ProductSdk
+@inject ArticleSdk ArticleSdk
+@inject NavigationManager NavigationManager
+
+<PageTitle>Product Details</PageTitle>
+
+<h3>Product Details</h3>
+
+@if (product == null)
+{
+    <div class="alert alert-info">Loading...</div>
+}
+else
+{
+    <div class="card mb-4">
+        <div class="card-body">
+            <h4>@product.Name</h4>
+            <p>@product.Description</p>
+            <p><strong>Manufacturer:</strong> @product.Manufacturer</p>
+            <p><strong>Publisher:</strong> @product.Publisher</p>
+            <p><strong>Total Articles:</strong> @product.NumberOfArticles</p>
+            <p><strong>Available Articles:</strong> @product.NumberOfAvailableArticles</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <h4>Articles</h4>
+
+            @if (articles == null || !articles.Any())
+            {
+                <div class="alert alert-warning">No articles available for this product.</div>
+            }
+            else
+            {
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Article ID</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var article in articles)
+                        {
+                            <tr>
+                                <td>@article.Id</td>
+                                <td>
+                                    <InputSelect class="form-control" @bind-Value="article.Status">
+                                        @foreach (var status in Enum.GetValues(typeof(ArticleStatus)).Cast<ArticleStatus>())
+                                        {
+                                            <option value="@status">@status</option>
+                                        }
+                                    </InputSelect>
+                                </td>
+                                <td>
+                                    <button class="btn btn-secondary" @onclick="() => UpdateArticleStatus(article)">Save</button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+    private ProductResult? product;
+    private List<ArticleRequestModel> articles = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            product = await ProductSdk.Get(Id);
+            var articleResults = await ArticleSdk.Find(Id);
+
+            foreach (var article in articleResults)
+            {
+                articles.Add(new ArticleRequestModel
+                    {
+                        Id = article.Id,
+                        ProductId = article.ProductId,
+                        Status = article.Status
+                    });
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading product details: {ex.Message}");
+        }
+    }
+
+    private async Task UpdateArticleStatus(ArticleRequestModel article)
+    {
+        try
+        {
+            var success = await ArticleSdk.UpdateStatus(article.Id, article.Status);
+            if (success)
+            {
+                // Update artikelen opnieuw laden
+                var articleResults = await ArticleSdk.Find(Id);
+                articles.Clear();
+                foreach (var result in articleResults)
+                {
+                    articles.Add(new ArticleRequestModel
+                        {
+                            Id = result.Id,
+                            ProductId = result.ProductId,
+                            Status = result.Status
+                        });
+                }
+            }
+            else
+            {
+                Console.WriteLine($"Failed to update article status for {article.Id}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error updating article status: {ex.Message}");
+        }
+    }
+
+    private class ArticleRequestModel
+    {
+        public Guid Id { get; set; }
+        public Guid ProductId { get; set; }
+        public ArticleStatus Status { get; set; }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,152 @@
+﻿@page "/order-management/details/{id:guid}"
+@using VivesRental.Sdk
+@using VivesRental.Services.Model.Filters
+@using VivesRental.Services.Model.Results
+@inject OrderSdk OrderSdk
+@inject OrderLineSdk OrderLineSdk
+@inject NavigationManager NavigationManager
+
+<h3>Order Details</h3>
+
+@if (order == null)
+{
+    <div class="alert alert-info">Loading...</div>
+}
+else
+{
+    <div class="card mb-4">
+        <div class="card-body">
+            <h4>Order Information</h4>
+            <p><strong>Order Number:</strong> @order.Id</p>
+            <p><strong>Customer Name:</strong> @order.CustomerFirstName @order.CustomerLastName</p>
+            <p><strong>Customer Email:</strong> @order.CustomerEmail</p>
+            <p><strong>Customer Phone:</strong> @order.CustomerPhoneNumber</p>
+            <p><strong>Order Date:</strong> @order.CreatedAt</p>
+            <p><strong>Returned Date:</strong> @(order.ReturnedAt.HasValue ? order.ReturnedAt.Value.ToString("g") : "Not Returned")</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <h4>Order Lines</h4>
+
+            @if (orderLines == null || !orderLines.Any())
+            {
+                <div class="alert alert-warning">No order lines available for this order.</div>
+            }
+            else
+            {
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Article ID</th>
+                            <th>Product Name</th>
+                            <th>Rented At</th>
+                            <th>Expires At</th>
+                            <th>Returned At</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var orderLine in orderLines)
+                        {
+                            <tr>
+                                <td>@orderLine.ArticleId</td>
+                                <td>@orderLine.ProductName</td>
+                                <td>@orderLine.RentedAt</td>
+                                <td>@orderLine.ExpiresAt</td>
+                                <td>@(orderLine.ReturnedAt.HasValue ? orderLine.ReturnedAt.Value.ToString("g") : "Not Returned")</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+    private OrderResult? order;
+    private List<OrderLineResult> orderLines = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        order = await OrderSdk.Get(Id);
+        if (order != null)
+        {
+            orderLines = await OrderLineSdk.Find(new OrderLineFilter { OrderId = order.Id });
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

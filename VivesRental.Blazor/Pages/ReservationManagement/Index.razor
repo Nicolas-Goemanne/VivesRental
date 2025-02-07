@@ -1,0 +1,126 @@
+﻿@page "/reservation-management"
+@using VivesRental.Sdk
+@using VivesRental.Services.Model.Results
+@inject ArticleReservationSdk ArticleReservationSdk
+@inject ArticleSdk ArticleSdk
+@inject ProductSdk ProductSdk
+
+<PageTitle>Reservation Management</PageTitle>
+
+<h3>Reservation Management</h3>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <a class="btn btn-primary" href="/reservation-management/create">Add New Reservation</a>
+    </div>
+</div>
+
+@if (reservations == null)
+{
+    <div class="alert alert-info">Loading...</div>
+}
+else if (!reservations.Any())
+{
+    <div class="alert alert-warning">No reservations available.</div>
+}
+else
+{
+    <div class="card">
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Customer</th>
+                        <th>Product</th>
+                        <th>Article ID</th>
+                        <th>From</th>
+                        <th>Until</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var reservation in reservations)
+                    {
+                        <tr>
+                            <td>@reservation.CustomerFirstName @reservation.CustomerLastName</td>
+                            <td>@reservation.ProductName</td>
+                            <td>@reservation.ArticleId</td>
+                            <td>@reservation.FromDateTime</td>
+                            <td>@reservation.UntilDateTime</td>
+                            <td>
+                                <button class="btn btn-danger btn-sm" @onclick="() => DeleteReservation(reservation.Id)">Delete</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@code {
+    private List<ArticleReservationResult>? reservations;
+
+    protected override async Task OnInitializedAsync()
+    {
+        reservations = await ArticleReservationSdk.Find(null);
+
+        // Voeg productnamen toe aan de reservatieresultaten
+        foreach (var reservation in reservations)
+        {
+            var article = await ArticleSdk.Get(reservation.ArticleId);
+            if (article != null)
+            {
+                var product = await ProductSdk.Get(article.ProductId);
+                if (product != null)
+                {
+                    reservation.ProductName = product.Name;
+                }
+            }
+        }
+    }
+
+    private async Task DeleteReservation(Guid reservationId)
+    {
+        var success = await ArticleReservationSdk.Remove(reservationId);
+        if (success)
+        {
+            reservations = await ArticleReservationSdk.Find(null);
+            StateHasChanged();
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

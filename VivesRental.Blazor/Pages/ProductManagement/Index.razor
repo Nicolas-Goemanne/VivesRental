@@ -1,0 +1,122 @@
+﻿@page "/product-management"
+@using VivesRental.Sdk
+@using VivesRental.Services.Model.Results
+@inject ProductSdk ProductSdk
+@inject ArticleSdk ArticleSdk
+@inject NavigationManager NavigationManager
+
+<PageTitle>Product Management</PageTitle>
+
+<h3>Product Management</h3>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <a class="btn btn-primary" href="/product-management/create">Add New Product</a>
+    </div>
+</div>
+
+@if (products == null)
+{
+    <div class="alert alert-info">Loading...</div>
+}
+else if (!products.Any())
+{
+    <div class="alert alert-warning">No products available.</div>
+}
+else
+{
+    <div class="card">
+        <div class="card-body">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Manufacturer</th>
+                        <th>Total Articles</th>
+                        <th>Available Articles</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var product in products)
+                    {
+                        <tr>
+                            <td>@product.Name</td>
+                            <td>@product.Description</td>
+                            <td>@product.Manufacturer</td>
+                            <td>@product.NumberOfArticles</td>
+                            <td>@product.NumberOfAvailableArticles</td>
+                            <td>
+                                <a class="btn btn-secondary btn-sm" href="/product-management/edit/@product.Id">Edit</a>
+                                <a class="btn btn-info btn-sm" href="/product-management/details/@product.Id">Details</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@code {
+    private List<ProductResult> products = new();
+    private List<ArticleResult> articles = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Stap 1: Haal alle artikelen op
+        articles = (await ArticleSdk.Find()).ToList();
+
+        // Stap 2: Groepeer artikelen op ProductId
+        var productIds = articles.Select(a => a.ProductId).Distinct().ToList();
+
+        // Stap 3: Haal de producten op die overeenkomen met de ProductIds
+        foreach (var productId in productIds)
+        {
+            var product = await ProductSdk.Get(productId);
+            if (product != null)
+            {
+                products.Add(product);
+            }
+        }
+
+        // Sorteren op naam (optioneel)
+        products = products.OrderBy(p => p.Name).ToList();
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

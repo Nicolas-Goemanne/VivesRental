@@ -2,52 +2,51 @@
 @using VivesRental.Sdk
 @using VivesRental.Services.Model.Requests
 @inject CustomerSdk CustomerSdk
-@inject NavigationManager Navigation
-@inject HttpClient Http
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
 
 <PageTitle>Edit Customer</PageTitle>
 
-<h1 class="text-center dark-red">Edit Customer</h1>
+<h3>Edit Customer</h3>
 
-<div class="container mt-4">
-    <EditForm Model="@editCustomer" OnValidSubmit="HandleValidSubmit">
-        <DataAnnotationsValidator />
-        <ValidationSummary />
+<div class="card">
+    <div class="card-body">
+        <EditForm Model="customer" OnValidSubmit="HandleValidSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
 
-        <div class="mb-3">
-            <label for="firstName" class="form-label">First Name</label>
-            <InputText id="firstName" class="form-control" @bind-Value="editCustomer.FirstName" />
-        </div>
+            <div class="mb-3">
+                <label for="firstName" class="form-label">First Name</label>
+                <InputText id="firstName" class="form-control" @bind-Value="customer.FirstName" />
+            </div>
+            <div class="mb-3">
+                <label for="lastName" class="form-label">Last Name</label>
+                <InputText id="lastName" class="form-control" @bind-Value="customer.LastName" />
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <InputText id="email" class="form-control" @bind-Value="customer.Email" />
+            </div>
+            <div class="mb-3">
+                <label for="phoneNumber" class="form-label">Phone Number</label>
+                <InputText id="phoneNumber" class="form-control" @bind-Value="customer.PhoneNumber" />
+            </div>
 
-        <div class="mb-3">
-            <label for="lastName" class="form-label">Last Name</label>
-            <InputText id="lastName" class="form-control" @bind-Value="editCustomer.LastName" />
-        </div>
-
-        <div class="mb-3">
-            <label for="email" class="form-label">Email</label>
-            <InputText id="email" class="form-control" @bind-Value="editCustomer.Email" />
-        </div>
-
-        <div class="mb-3">
-            <label for="phoneNumber" class="form-label">Phone Number</label>
-            <InputText id="phoneNumber" class="form-control" @bind-Value="editCustomer.PhoneNumber" />
-        </div>
-
-        <button type="submit" class="btn dark-red-btn text-white">Submit</button>
-    </EditForm>
+            <button type="submit" class="btn btn-primary">Save</button>
+        </EditForm>
+    </div>
 </div>
 
 @code {
     [Parameter] public Guid Id { get; set; }
-    private CustomerRequest editCustomer = new CustomerRequest();
+    private CustomerRequest customer = new CustomerRequest();
 
     protected override async Task OnInitializedAsync()
     {
         var result = await CustomerSdk.Get(Id);
         if (result != null)
         {
-            editCustomer = new CustomerRequest
+            customer = new CustomerRequest
                 {
                     FirstName = result.FirstName,
                     LastName = result.LastName,
@@ -55,23 +54,55 @@
                     PhoneNumber = result.PhoneNumber
                 };
         }
-
-        await base.OnInitializedAsync();
     }
 
     private async Task HandleValidSubmit()
     {
-        var result = await CustomerSdk.Edit(Id, editCustomer);
+        var result = await CustomerSdk.Edit(Id, customer);
         if (result != null)
         {
-            Navigation.NavigateTo("/customer-management");
-        }
-        else
-        {
-            // Handle error
+            NavigationManager.NavigateTo(AppRoutes.Customers.Index);
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

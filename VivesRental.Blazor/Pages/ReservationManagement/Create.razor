@@ -1,0 +1,174 @@
+﻿@page "/reservation-management/create"
+@using VivesRental.Sdk
+@using VivesRental.Services.Model.Requests
+@using VivesRental.Services.Model.Results
+@inject ArticleReservationSdk ArticleReservationSdk
+@inject ProductSdk ProductSdk
+@inject CustomerSdk CustomerSdk
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
+
+<PageTitle>Create Reservation</PageTitle>
+
+<h3>Create Reservation</h3>
+
+<div class="card">
+    <div class="card-body">
+        <EditForm Model="reservation" OnValidSubmit="HandleValidSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="mb-3">
+                <label for="customerId" class="form-label">Select Customer</label>
+                <InputSelect id="customerId" class="form-control" @bind-Value="selectedCustomerId">
+                    <option value="">Select Customer</option>
+                    @foreach (var customer in customers)
+                    {
+                        <option value="@customer.Id">@customer.FirstName @customer.LastName</option>
+                    }
+                </InputSelect>
+            </div>
+
+            <div class="mb-3">
+                <label for="productId" class="form-label">Select Product</label>
+                <InputSelect id="productId" class="form-control" @bind-Value="selectedProductId">
+                    <option value="">Select Product</option>
+                    @foreach (var product in products)
+                    {
+                        <option value="@product.Id">@product.Name</option>
+                    }
+                </InputSelect>
+            </div>
+
+            <div class="mb-3">
+                <label for="fromDateTime" class="form-label">From</label>
+                <InputDate id="fromDateTime" class="form-control" @bind-Value="reservation.FromDateTime" />
+            </div>
+            <div class="mb-3">
+                <label for="untilDateTime" class="form-label">Until</label>
+                <InputDate id="untilDateTime" class="form-control" @bind-Value="reservation.UntilDateTime" />
+            </div>
+
+            <button type="submit" class="btn btn-primary">Create Reservation</button>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private List<CustomerResult> customers = new();
+    private List<ProductResult> products = new();
+    private Guid? selectedCustomerId;
+    private Guid? selectedProductId;
+    private ArticleReservationRequest reservation = new ArticleReservationRequest
+        {
+            FromDateTime = DateTime.Now,
+            UntilDateTime = DateTime.Now.AddDays(1)
+        };
+
+    protected override async Task OnInitializedAsync()
+    {
+        customers = await CustomerSdk.Find(null);
+        products = await ProductSdk.Find(null);
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (!selectedCustomerId.HasValue || !selectedProductId.HasValue)
+        {
+            await JSRuntime.InvokeAsync<object>("alert", "Please select both a customer and a product.");
+            return;
+        }
+
+        var article = await ArticleReservationSdk.FindFirstReservableArticle(selectedProductId.Value);
+        if (article == null)
+        {
+            await JSRuntime.InvokeAsync<object>("alert", "No available articles for the selected product.");
+            return;
+        }
+
+        reservation.CustomerId = selectedCustomerId.Value;
+        reservation.ArticleId = article.Id;
+
+        var result = await ArticleReservationSdk.Create(reservation);
+        if (result != null)
+        {
+            NavigationManager.NavigateTo("/reservation-management");
+        }
+        else
+        {
+            await JSRuntime.InvokeAsync<object>("alert", "Failed to create reservation. Please try again.");
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

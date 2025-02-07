@@ -8,45 +8,60 @@ namespace VivesRental.Sdk
 {
     public class CustomerSdk
     {
-        private readonly HttpClient _httpClient;
+        private readonly IHttpClientFactory _httpClientFactory;
 
-        public CustomerSdk(HttpClient httpClient)
+        public CustomerSdk(IHttpClientFactory httpClientFactory)
         {
-            _httpClient = httpClient;
+            _httpClientFactory = httpClientFactory;
         }
 
         public async Task<CustomerResult?> Get(Guid id)
         {
-            var response = await _httpClient.GetAsync($"api/customers/{id}");
+            var httpClient = _httpClientFactory.CreateClient("VivesRentalApi");
+            var response = await httpClient.GetAsync($"api/Customer/{id}");
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<CustomerResult>();
         }
 
         public async Task<List<CustomerResult>> Find(CustomerFilter? filter)
         {
-            var response = await _httpClient.PostAsJsonAsync("api/customers/find", filter);
+            var httpClient = _httpClientFactory.CreateClient("VivesRentalApi");
+            var queryString = filter != null ? $"?Search={filter.Search}" : string.Empty;
+            var response = await httpClient.GetAsync($"api/Customer{queryString}");
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<List<CustomerResult>>();
         }
 
         public async Task<CustomerResult?> Create(CustomerRequest entity)
         {
-            var response = await _httpClient.PostAsJsonAsync("api/customers", entity);
+            var httpClient = _httpClientFactory.CreateClient("VivesRentalApi");
+            var response = await httpClient.PostAsJsonAsync("api/Customer", entity);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<CustomerResult>();
         }
 
         public async Task<CustomerResult?> Edit(Guid id, CustomerRequest entity)
         {
-            var response = await _httpClient.PutAsJsonAsync($"api/customers/{id}", entity);
+            var httpClient = _httpClientFactory.CreateClient("VivesRentalApi");
+            var response = await httpClient.PutAsJsonAsync($"api/Customer/{id}", entity);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<CustomerResult>();
         }
 
         public async Task<bool> Remove(Guid id)
         {
-            var response = await _httpClient.DeleteAsync($"api/customers/{id}");
+            var httpClient = _httpClientFactory.CreateClient("VivesRentalApi");
+            var response = await httpClient.DeleteAsync($"api/Customer/{id}");
             return response.IsSuccessStatusCode;
         }
     }
 }
+
+
+
+
+
+
+
+
+

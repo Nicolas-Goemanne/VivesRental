@@ -25,6 +25,13 @@ namespace VivesRental.Blazor.Security
             NotifyAuthenticationStateChanged(Task.FromResult(authenticationState));
         }
 
+        public void MarkUserAsLoggedOut()
+        {
+            var anonymousUser = new ClaimsPrincipal(new ClaimsIdentity());
+            var authenticationState = Task.FromResult(new AuthenticationState(anonymousUser));
+            NotifyAuthenticationStateChanged(authenticationState);
+        }
+
         private AuthenticationState GetAuthenticationStateFromToken()
         {
             var token = _tokenStore.GetToken();

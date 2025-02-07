@@ -7,44 +7,55 @@ namespace VivesRental.Sdk
 {
     public class OrderSdk
     {
-        private readonly HttpClient _httpClient;
+        private readonly IHttpClientFactory _httpClientFactory;
 
-        public OrderSdk(HttpClient httpClient)
+        public OrderSdk(IHttpClientFactory httpClientFactory)
         {
-            _httpClient = httpClient;
+            _httpClientFactory = httpClientFactory;
         }
 
         public async Task<OrderResult?> Get(Guid id)
         {
-            var response = await _httpClient.GetAsync($"api/orders/{id}");
+            var httpClient = _httpClientFactory.CreateClient("VivesRentalApi");
+            var response = await httpClient.GetAsync($"api/Order/{id}");
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<OrderResult>();
         }
 
         public async Task<List<OrderResult>> Find(OrderFilter? filter)
         {
-            var response = await _httpClient.PostAsJsonAsync("api/orders/find", filter);
+            var httpClient = _httpClientFactory.CreateClient("VivesRentalApi");
+            var response = await httpClient.GetAsync("api/Order");
             response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<List<OrderResult>>();
+            return await response.Content.ReadFromJsonAsync<List<OrderResult>>() ?? new List<OrderResult>();
         }
 
-        public async Task<OrderResult?> Create(Guid customerId)
+        public async Task<OrderResult?> CreateAsync(Guid customerId)
         {
-            var response = await _httpClient.PostAsJsonAsync($"api/orders?customerId={customerId}", customerId);
+            var httpClient = _httpClientFactory.CreateClient("VivesRentalApi");
+            var response = await httpClient.PostAsync($"api/Order?customerId={customerId}", null);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<OrderResult>();
         }
 
-        public async Task<bool> Return(Guid id, DateTime returnedAt)
+        public async Task<bool> Return(Guid orderId, DateTime returnedAt)
         {
-            var response = await _httpClient.PutAsJsonAsync($"api/orders/{id}/return", returnedAt);
-            return response.IsSuccessStatusCode;
-        }
-
-        public async Task<bool> Remove(Guid id)
-        {
-            var response = await _httpClient.DeleteAsync($"api/orders/{id}");
+            var httpClient = _httpClientFactory.CreateClient("VivesRentalApi");
+            var response = await httpClient.PostAsJsonAsync($"api/Order/{orderId}/Return", returnedAt);
             return response.IsSuccessStatusCode;
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

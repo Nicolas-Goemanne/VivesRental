@@ -12,9 +12,7 @@ using VivesRental.Repository.Configuration;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -67,7 +65,7 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(builder =>
     {
-        builder.WithOrigins("https://localhost:7130") 
+        builder.WithOrigins("https://localhost:7130")
                .AllowAnyHeader()
                .AllowAnyMethod();
     });
@@ -81,7 +79,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "VivesRental API V1");
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "VivesRentalApi");
         c.RoutePrefix = string.Empty; // To serve the Swagger UI at the app's root (http://localhost:<port>/)
     });
 }
@@ -96,6 +94,7 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
 
 
 

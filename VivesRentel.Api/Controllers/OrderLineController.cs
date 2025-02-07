@@ -1,70 +1,50 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using VivesRental.Sdk;
+using VivesRental.Services.Abstractions;
 using VivesRental.Services.Model.Filters;
 using VivesRental.Services.Model.Results;
 
-namespace VivesRental.Api.Controllers
+[ApiController]
+[Route("api/[controller]")]
+public class OrderLineController : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]")]
-    public class OrderLineController : ControllerBase
+    private readonly IOrderLineService _orderLineService;
+
+    public OrderLineController(IOrderLineService orderLineService)
     {
-        private readonly OrderLineSdk _orderLineSdk;
+        _orderLineService = orderLineService;
+    }
 
-        public OrderLineController(OrderLineSdk orderLineSdk)
-        {
-            _orderLineSdk = orderLineSdk;
-        }
+    [HttpGet]
+    public async Task<ActionResult<List<OrderLineResult>>> Find([FromQuery] OrderLineFilter? filter)
+    {
+        var results = await _orderLineService.Find(filter);
+        return Ok(results);
+    }
 
-        [HttpGet("{id}")]
-        public async Task<ActionResult<OrderLineResult>> Get(Guid id)
+    [HttpPost("Rent")]
+    public async Task<IActionResult> Rent([FromQuery] Guid orderId, [FromQuery] Guid articleId)
+    {
+        var success = await _orderLineService.Rent(orderId, articleId);
+        if (!success)
         {
-            var result = await _orderLineSdk.Get(id);
-            if (result == null)
-            {
-                return NotFound();
-            }
-            return Ok(result);
+            return BadRequest(new { Message = "Failed to rent article. Verify the order ID and article ID." });
         }
+        return NoContent();
+    }
 
-        [HttpGet]
-        public async Task<ActionResult<List<OrderLineResult>>> Find([FromQuery] OrderLineFilter? filter)
-        {
-            var results = await _orderLineSdk.Find(filter);
-            return Ok(results);
-        }
 
-        [HttpPost("rent")]
-        public async Task<IActionResult> Rent(Guid orderId, Guid articleId)
+    [HttpPost("{orderLineId}/Return")]
+    public async Task<IActionResult> Return(Guid orderLineId, [FromBody] DateTime returnedAt)
+    {
+        var success = await _orderLineService.Return(orderLineId, returnedAt);
+        if (!success)
         {
-            var success = await _orderLineSdk.Rent(orderId, articleId);
-            if (!success)
-            {
-                return BadRequest();
-            }
-            return NoContent();
+            return BadRequest(new { Message = "Failed to return order line. Verify order line ID and return date." });
         }
-
-        [HttpPost("rent/multiple")]
-        public async Task<IActionResult> Rent(Guid orderId, IList<Guid> articleIds)
-        {
-            var success = await _orderLineSdk.Rent(orderId, articleIds);
-            if (!success)
-            {
-                return BadRequest();
-            }
-            return NoContent();
-        }
-
-        [HttpPost("return")]
-        public async Task<IActionResult> Return(Guid orderLineId, DateTime returnedAt)
-        {
-            var success = await _orderLineSdk.Return(orderLineId, returnedAt);
-            if (!success)
-            {
-                return BadRequest();
-            }
-            return NoContent();
-        }
+        return NoContent();
     }
 }
+
+
+
+

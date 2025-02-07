@@ -1,0 +1,326 @@
+﻿@page "/order-management/create"
+@using VivesRental.Enums
+@using VivesRental.Sdk
+@using VivesRental.Services.Model.Results
+@inject OrderSdk OrderSdk
+@inject CustomerSdk CustomerSdk
+@inject ProductSdk ProductSdk
+@inject ArticleSdk ArticleSdk
+@inject OrderLineSdk OrderLineSdk
+@inject NavigationManager NavigationManager
+
+<h3>Create Rental Order</h3>
+
+<div class="card">
+    <div class="card-body">
+        <EditForm Model="orderModel" OnValidSubmit="HandleSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="mb-3">
+                <label for="customerId" class="form-label">Select Customer:</label>
+                <InputSelect id="customerId" class="form-control" @bind-Value="orderModel.CustomerId">
+                    <option value="">-- Select a Customer --</option>
+                    @foreach (var customer in customers)
+                    {
+                        <option value="@customer.Id">@customer.FirstName @customer.LastName</option>
+                    }
+                </InputSelect>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Create Order</button>
+        </EditForm>
+    </div>
+</div>
+
+@if (order != null)
+{
+    <div class="card mt-4">
+        <div class="card-body">
+            <h3>Add Products to Order</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Product Name</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var product in products)
+                    {
+                        <tr>
+                            <td>@product.Name</td>
+                            <td>
+                                <button class="btn btn-secondary" @onclick="() => AddProductToOrder(product.Id)">Add</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@if (orderLines.Any())
+{
+    <div class="card mt-4">
+        <div class="card-body">
+            <h3>Order Lines</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Product Name</th>
+                        <th>Article ID</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var orderLine in orderLines)
+                    {
+                        <tr>
+                            <td>@orderLine.ProductName</td>
+                            <td>@orderLine.ArticleId</td>
+                            <td>
+                                <InputDate @bind-Value="orderLine.RentedAt" class="form-control" />
+                            </td>
+                            <td>
+                                <InputDate @bind-Value="orderLine.ExpiresAt" class="form-control" />
+                            </td>
+                            <td>
+                                <button class="btn btn-danger" @onclick="() => RemoveProductFromOrder(orderLine.ArticleId)">Remove</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <button class="btn btn-primary" @onclick="SaveOrderLines">Save Order Lines</button>
+        </div>
+    </div>
+}
+
+@if (errorMessage != null)
+{
+    <div class="alert alert-danger mt-4">@errorMessage</div>
+}
+
+@code {
+    private OrderModel orderModel = new OrderModel();
+    private List<CustomerResult> customers = new();
+    private List<ProductResult> products = new();
+    private List<OrderLineResult> orderLines = new();
+    private OrderResult? order;
+    private string? errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        customers = await CustomerSdk.Find(null);
+        products = await ProductSdk.Find(null);
+    }
+
+    private async Task AddProductToOrder(Guid productId)
+    {
+        if (order == null)
+        {
+            errorMessage = "Order not found.";
+            return;
+        }
+
+        // Vind beschikbare artikelen voor het geselecteerde product
+        var articles = await ArticleSdk.Find(productId);
+        var firstAvailable = articles.FirstOrDefault(a => a.Status == ArticleStatus.Normal);
+
+        if (firstAvailable == null)
+        {
+            errorMessage = "No available articles for the selected product.";
+            return;
+        }
+
+        // Voeg het artikel toe aan de orderLines lijst
+        var product = products.FirstOrDefault(p => p.Id == productId);
+
+        if (product != null)
+        {
+            orderLines.Add(new OrderLineResult
+                {
+                    ProductName = product.Name,
+                    ArticleId = firstAvailable.Id,
+                    RentedAt = DateTime.Now,
+                    ExpiresAt = DateTime.Now.AddDays(7) // Default rental period of 7 days
+                });
+        }
+    }
+
+    private void RemoveProductFromOrder(Guid? articleId)
+    {
+        var orderLine = orderLines.FirstOrDefault(ol => ol.ArticleId == articleId);
+        if (orderLine != null)
+        {
+            orderLines.Remove(orderLine);
+        }
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (orderModel.CustomerId == Guid.Empty)
+        {
+            errorMessage = "Please select a customer.";
+            return;
+        }
+
+        // Maak een nieuw order aan
+        order = await OrderSdk.CreateAsync(orderModel.CustomerId);
+        if (order == null)
+        {
+            errorMessage = "Failed to create order.";
+            return;
+        }
+
+        errorMessage = null;
+    }
+
+    private async Task SaveOrderLines()
+    {
+        if (order == null)
+        {
+            errorMessage = "Order not found.";
+            return;
+        }
+
+        foreach (var orderLine in orderLines)
+        {
+            var success = await OrderLineSdk.Rent(order.Id, orderLine.ArticleId.Value);
+            if (!success)
+            {
+                errorMessage = $"Failed to rent the article with ID {orderLine.ArticleId}.";
+                return;
+            }
+        }
+
+        NavigationManager.NavigateTo("/order-management");
+    }
+
+    private class OrderModel
+    {
+        public Guid CustomerId { get; set; }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

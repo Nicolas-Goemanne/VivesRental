@@ -8,41 +8,66 @@ namespace VivesRental.Sdk
 {
     public class ArticleReservationSdk
     {
-        private readonly HttpClient _httpClient;
+        private readonly IHttpClientFactory _httpClientFactory;
 
-        public ArticleReservationSdk(HttpClient httpClient)
+        public ArticleReservationSdk(IHttpClientFactory httpClientFactory)
         {
-            _httpClient = httpClient;
+            _httpClientFactory = httpClientFactory;
         }
 
         public async Task<ArticleReservationResult?> Get(Guid id)
         {
-            var response = await _httpClient.GetAsync($"api/articlereservations/{id}");
+            var httpClient = _httpClientFactory.CreateClient("VivesRentalApi");
+            var response = await httpClient.GetAsync($"api/ArticleReservation/{id}");
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<ArticleReservationResult>();
         }
 
-        public async Task<List<ArticleReservationResult>> Find(ArticleReservationFilter? filter)
+        public async Task<List<ArticleReservationResult>> Find(ArticleReservationFilter? filter = null)
         {
-            var response = await _httpClient.PostAsJsonAsync("api/articlereservations/find", filter);
+            var httpClient = _httpClientFactory.CreateClient("VivesRentalApi");
+            var query = filter != null
+                ? $"?articleId={filter.ArticleId}&customerId={filter.CustomerId}"
+                : string.Empty;
+
+            var response = await httpClient.GetAsync($"api/ArticleReservation{query}");
             response.EnsureSuccessStatusCode();
-            return await response.Content.ReadFromJsonAsync<List<ArticleReservationResult>>();
+            return await response.Content.ReadFromJsonAsync<List<ArticleReservationResult>>() ?? new List<ArticleReservationResult>();
+        }
+
+        public async Task<ArticleResult?> FindFirstReservableArticle(Guid productId)
+        {
+            var httpClient = _httpClientFactory.CreateClient("VivesRentalApi");
+            var response = await httpClient.GetAsync($"api/Article?productId={productId}");
+            response.EnsureSuccessStatusCode();
+            var articles = await response.Content.ReadFromJsonAsync<List<ArticleResult>>() ?? new List<ArticleResult>();
+
+            // Retourneer het eerste artikel met status Normal
+            return articles.FirstOrDefault(a => a.Status == VivesRental.Enums.ArticleStatus.Normal);
         }
 
         public async Task<ArticleReservationResult?> Create(ArticleReservationRequest entity)
         {
-            var response = await _httpClient.PostAsJsonAsync("api/articlereservations", entity);
+            var httpClient = _httpClientFactory.CreateClient("VivesRentalApi");
+            var response = await httpClient.PostAsJsonAsync("api/ArticleReservation", entity);
             response.EnsureSuccessStatusCode();
             return await response.Content.ReadFromJsonAsync<ArticleReservationResult>();
         }
 
         public async Task<bool> Remove(Guid id)
         {
-            var response = await _httpClient.DeleteAsync($"api/articlereservations/{id}");
+            var httpClient = _httpClientFactory.CreateClient("VivesRentalApi");
+            var response = await httpClient.DeleteAsync($"api/ArticleReservation/{id}");
             return response.IsSuccessStatusCode;
         }
     }
 }
+
+
+
+
+
+
 
 
 

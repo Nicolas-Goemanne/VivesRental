@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using VivesRental.Sdk;
 using VivesRental.Services.Model.Filters;
 using VivesRental.Services.Model.Requests;
 using VivesRental.Services.Model.Results;
+using VivesRental.Services.Abstractions;
 
 namespace VivesRental.Api.Controllers
 {
@@ -10,17 +10,17 @@ namespace VivesRental.Api.Controllers
     [Route("api/[controller]")]
     public class ArticleReservationController : ControllerBase
     {
-        private readonly ArticleReservationSdk _articleReservationSdk;
+        private readonly IArticleReservationService _articleReservationService;
 
-        public ArticleReservationController(ArticleReservationSdk articleReservationSdk)
+        public ArticleReservationController(IArticleReservationService articleReservationService)
         {
-            _articleReservationSdk = articleReservationSdk;
+            _articleReservationService = articleReservationService;
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<ArticleReservationResult>> Get(Guid id)
         {
-            var result = await _articleReservationSdk.Get(id);
+            var result = await _articleReservationService.Get(id);
             if (result == null)
             {
                 return NotFound();
@@ -31,14 +31,14 @@ namespace VivesRental.Api.Controllers
         [HttpGet]
         public async Task<ActionResult<List<ArticleReservationResult>>> Find([FromQuery] ArticleReservationFilter? filter)
         {
-            var results = await _articleReservationSdk.Find(filter);
+            var results = await _articleReservationService.Find(filter);
             return Ok(results);
         }
 
         [HttpPost]
-        public async Task<ActionResult<ArticleReservationResult>> Create(ArticleReservationRequest request)
+        public async Task<ActionResult<ArticleReservationResult>> Create([FromBody] ArticleReservationRequest request)
         {
-            var result = await _articleReservationSdk.Create(request);
+            var result = await _articleReservationService.Create(request);
             if (result == null)
             {
                 return BadRequest();
@@ -49,7 +49,7 @@ namespace VivesRental.Api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Remove(Guid id)
         {
-            var success = await _articleReservationSdk.Remove(id);
+            var success = await _articleReservationService.Remove(id);
             if (!success)
             {
                 return NotFound();
@@ -58,3 +58,5 @@ namespace VivesRental.Api.Controllers
         }
     }
 }
+
+

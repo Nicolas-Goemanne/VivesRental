@@ -1,0 +1,85 @@
+﻿@page "/order-management/return"
+@using VivesRental.Sdk
+@using VivesRental.Services.Model.Results
+@inject OrderLineSdk OrderLineSdk
+@inject NavigationManager NavigationManager
+
+<PageTitle>Return Order Line</PageTitle>
+
+<h3>Return Order Line</h3>
+
+<EditForm Model="returnOrderLine" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label for="orderLineId">Order Line ID</label>
+        <InputText id="orderLineId" class="form-control" @bind-Value="returnOrderLine.OrderLineIdString" />
+    </div>
+    <div class="form-group">
+        <label for="returnedAt">Returned At</label>
+        <InputDate id="returnedAt" class="form-control" @bind-Value="returnOrderLine.ReturnedAt" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Return</button>
+</EditForm>
+
+@code {
+    private ReturnOrderLineModel returnOrderLine = new ReturnOrderLineModel();
+
+    private async Task HandleValidSubmit()
+    {
+        var success = await OrderLineSdk.Return(returnOrderLine.OrderLineId, returnOrderLine.ReturnedAt);
+        if (success)
+        {
+            NavigationManager.NavigateTo(AppRoutes.Orders.Index);
+        }
+    }
+
+    private class ReturnOrderLineModel
+    {
+        public Guid OrderLineId { get; set; }
+        public DateTime ReturnedAt { get; set; } = DateTime.Now;
+
+        public string OrderLineIdString
+        {
+            get => OrderLineId.ToString();
+            set => OrderLineId = Guid.Parse(value);
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

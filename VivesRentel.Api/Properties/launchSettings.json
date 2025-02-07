@@ -2,11 +2,14 @@
   "profiles": {
     "VivesRental.Api": {
       "commandName": "Project",
+      "dotnetRunMessages": true,
       "launchBrowser": true,
+      "applicationUrl": "https://localhost:57351;https://localhost:57352",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
-      },
-      "applicationUrl": "https://localhost:57351;http://localhost:57352"
+      }
     }
   }
 }
+     
+  

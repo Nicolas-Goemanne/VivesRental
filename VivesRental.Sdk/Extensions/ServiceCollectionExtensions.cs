@@ -14,7 +14,7 @@ namespace VivesRental.Sdk.Extensions
         {
             services.AddScoped<AuthorizationHandler>();
 
-            services.AddHttpClient("VivesRental API V1", options =>
+            services.AddHttpClient("VivesRentalApi", options =>
             {
                 options.BaseAddress = new Uri(apiUrl);
             }).AddHttpMessageHandler<AuthorizationHandler>();
@@ -22,6 +22,7 @@ namespace VivesRental.Sdk.Extensions
             services.AddScoped<IdentitySdk>();
             services.AddScoped<CustomerSdk>();
             services.AddScoped<OrderSdk>();
+            services.AddScoped<ArticleSdk>();
             services.AddScoped<ProductSdk>();
             services.AddScoped<ArticleReservationSdk>();
             services.AddScoped<OrderLineSdk>();

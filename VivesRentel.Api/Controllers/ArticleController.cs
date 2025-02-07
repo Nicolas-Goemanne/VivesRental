@@ -30,9 +30,19 @@ namespace VivesRental.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<ArticleResult>>> Find([FromQuery] ArticleFilter? filter)
+        public async Task<ActionResult<List<ArticleResult>>> Find([FromQuery] Guid? productId = null)
         {
+            // Als er geen productId is, geef een lege filter door
+            var filter = productId.HasValue ? new ArticleFilter { ProductId = productId.Value } : null;
+
             var results = await _articleService.Find(filter);
+
+            if (results == null || results.Count == 0)
+            {
+                // Retourneer een lege lijst in plaats van een 404-fout
+                return Ok(new List<ArticleResult>());
+            }
+
             return Ok(results);
         }
 
@@ -48,7 +58,7 @@ namespace VivesRental.Api.Controllers
         }
 
         [HttpPut("{id}/status")]
-        public async Task<IActionResult> UpdateStatus(Guid id, ArticleStatus status)
+        public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] ArticleStatus status)
         {
             var success = await _articleService.UpdateStatus(id, status);
             if (!success)
@@ -70,6 +80,15 @@ namespace VivesRental.Api.Controllers
         }
     }
 }
+
+
+
+
+
+
+
+
+
 
 
 

@@ -1,0 +1,181 @@
+﻿@page "/reservation-management/edit/{id:guid}"
+@using VivesRental.Sdk
+@using VivesRental.Services.Model.Requests
+@using VivesRental.Services.Model.Results
+@inject ArticleReservationSdk ArticleReservationSdk
+@inject CustomerSdk CustomerSdk
+@inject ArticleSdk ArticleSdk
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit Reservation</PageTitle>
+
+<h3>Edit Reservation</h3>
+
+<div class="card">
+    <div class="card-body">
+        <EditForm Model="@reservation" OnValidSubmit="UpdateReservation">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="mb-3">
+                <label for="customerId" class="form-label">Customer</label>
+                <InputSelect id="customerId" class="form-control" @bind-Value="reservation.CustomerId" required>
+                    <option value="">Select Customer</option>
+                    @foreach (var customer in customers)
+                    {
+                        <option value="@customer.Id">@customer.FirstName @customer.LastName</option>
+                    }
+                </InputSelect>
+            </div>
+
+            <div class="mb-3">
+                <label for="articleId" class="form-label">Article</label>
+                <InputSelect id="articleId" class="form-control" @bind-Value="reservation.ArticleId" required>
+                    <option value="">Select Article</option>
+                    @foreach (var article in articles)
+                    {
+                        <option value="@article.Id">@article.ProductName</option>
+                    }
+                </InputSelect>
+            </div>
+
+            <div class="mb-3">
+                <label for="fromDateTime" class="form-label">From</label>
+                <InputDate id="fromDateTime" class="form-control" @bind-Value="reservation.FromDateTime" required />
+            </div>
+            <div class="mb-3">
+                <label for="untilDateTime" class="form-label">Until</label>
+                <InputDate id="untilDateTime" class="form-control" @bind-Value="reservation.UntilDateTime" required />
+            </div>
+
+            <button class="btn btn-primary" type="submit">Save</button>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    [Parameter] public Guid Id { get; set; }
+    private ArticleReservationRequest reservation = new();
+    private List<CustomerResult> customers = new();
+    private List<ArticleResult> articles = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        customers = await CustomerSdk.Find(null);
+        var result = await ArticleReservationSdk.Get(Id);
+        if (result != null)
+        {
+            reservation = new ArticleReservationRequest
+                {
+                    CustomerId = result.CustomerId,
+                    ArticleId = result.ArticleId,
+                    FromDateTime = result.FromDateTime,
+                    UntilDateTime = result.UntilDateTime
+                };
+            articles = (await ArticleSdk.Find()).ToList();
+        }
+    }
+
+    private async Task UpdateReservation()
+    {
+        if (reservation.CustomerId != Guid.Empty && reservation.ArticleId != Guid.Empty)
+        {
+            // Remove existing reservation
+            await ArticleReservationSdk.Remove(Id);
+
+            // Create updated reservation
+            await ArticleReservationSdk.Create(reservation);
+            NavigationManager.NavigateTo(AppRoutes.Reservations.Index);
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

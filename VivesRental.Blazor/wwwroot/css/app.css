@@ -11,7 +11,6 @@
 }
 
 #blazor-error-ui {
-    color-scheme: light only;
     background: lightyellow;
     bottom: 0;
     box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
@@ -130,6 +129,59 @@ footer {
 .dark-red-btn:hover {
     background-color: #a52a2a; 
     border-color: #a52a2a; 
+}
+
+.dark-red {
+    color: #b22222;
+}
+
+.dark-red-bg {
+    background-color: #b22222;
+}
+
+.dark-red-btn {
+    background-color: #b22222;
+    border-color: #b22222;
+    color: white;
+}
+
+.dark-red-btn:hover {
+    background-color: #a52a2a;
+    border-color: #a52a2a;
+}
+
+
+.btn-primary {
+    background-color: #b22222;
+    border-color: #b22222;
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #a52a2a;
+    border-color: #a52a2a;
+}
+
+.btn-secondary {
+    background-color: #d3d3d3;
+    border-color: #d3d3d3;
+    color: black;
+}
+
+.btn-secondary:hover {
+    background-color: #c0c0c0;
+    border-color: #c0c0c0;
+}
+
+.btn-danger {
+    background-color: #ff4c4c;
+    border-color: #ff4c4c;
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: #e60000;
+    border-color: #e60000;
 }
 
 

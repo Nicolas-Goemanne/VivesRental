@@ -10,7 +10,7 @@ namespace VivesRental.Sdk
 
         public async Task<AuthenticationResult> SignIn(UserSignInRequest request)
         {
-            var httpClient = _httpClientFactory.CreateClient("VivesRental API V1");
+            var httpClient = _httpClientFactory.CreateClient("VivesRentalApi");
 
             var route = "Identity/sign-in";
             var response = await httpClient.PostAsJsonAsync(route, request);
@@ -28,7 +28,7 @@ namespace VivesRental.Sdk
 
         public async Task<AuthenticationResult> Register(UserRegisterRequest request)
         {
-            var httpClient = _httpClientFactory.CreateClient("VivesRental API V1");
+            var httpClient = _httpClientFactory.CreateClient("VivesRentalApi");
 
             var route = "Identity/register";
             var response = await httpClient.PostAsJsonAsync(route, request);
